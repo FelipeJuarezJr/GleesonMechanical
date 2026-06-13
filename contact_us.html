@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
     <title>Schedule a Visit | Gleeson Mechanical</title>
     <meta name="description"
         content="Schedule an HVAC service visit with Gleeson Mechanical. Choose your preferred date and time or request same-day service.">
@@ -18,8 +19,8 @@
 
         /* ── Calendar ── */
         .cal-day {
-            width: 2.75rem;
-            height: 2.75rem;
+            aspect-ratio: 1 / 1;
+            width: 100%;
             border-radius: 0.5rem;
             display: flex;
             align-items: center;
@@ -31,10 +32,12 @@
             border: 2px solid transparent;
         }
 
-        .cal-day:hover:not(.cal-disabled) {
-            background: #1e3a5f;
-            color: #fff;
-            transform: scale(1.08);
+        @media (hover: hover) {
+            .cal-day:hover:not(.cal-disabled) {
+                background: #1e3a5f;
+                color: #fff;
+                transform: scale(1.08);
+            }
         }
 
         .cal-day.cal-selected {
@@ -67,10 +70,12 @@
             background: #f8fafc;
         }
 
-        .time-chip:hover {
-            border-color: #1e3a5f;
-            color: #1e3a5f;
-            background: #eff6ff;
+        @media (hover: hover) {
+            .time-chip:hover {
+                border-color: #1e3a5f;
+                color: #1e3a5f;
+                background: #eff6ff;
+            }
         }
 
         .time-chip.selected {
@@ -104,6 +109,8 @@
             transition: border-color 0.2s, box-shadow 0.2s;
             outline: none;
             color: #1e293b;
+            appearance: none;
+            -webkit-appearance: none;
         }
 
         .form-input:focus {
@@ -173,6 +180,26 @@
             display: flex;
         }
 
+        /* ── Animated bounce-in modal ── */
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.03);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
         /* ── Animated gradient hero ── */
         .hero-grad {
             background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
@@ -185,37 +212,59 @@
             box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
             border: 1px solid #f1f5f9;
         }
+
+        /* ── Pulsing button animation ── */
+        @keyframes callPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(220, 38, 38, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            }
+        }
+
+        .animate-call-pulse {
+            animation: callPulse 1.8s infinite;
+        }
     </style>
 </head>
 
 <body class="bg-slate-50 text-slate-800 antialiased">
 
-    <!-- Top Urgent Banner -->
-    <div class="bg-red-600 text-white text-center py-2 px-4 text-sm font-semibold tracking-wide">
-        💥 Need Emergency AC Repair? We are open 24/7 across the Valley! Call or Text Now.
-    </div>
-
-    <!-- Navigation -->
-    <nav class="sticky top-0 bg-white shadow-md z-40 border-b border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <a href="/" class="flex flex-col no-underline">
-                <span class="text-2xl font-black tracking-tight text-slate-900 uppercase">Gleeson</span>
-                <span class="text-xs font-bold tracking-widest text-red-600 uppercase -mt-1">Mechanical</span>
-            </a>
-            <div class="hidden md:flex space-x-8 font-semibold text-slate-600">
-                <a href="/" class="hover:text-blue-900 transition">Cooling</a>
-                <a href="/" class="hover:text-blue-900 transition">Heating</a>
-                <a href="/" class="hover:text-blue-900 transition">Energy Savings</a>
-                <a href="/" class="hover:text-blue-900 transition">About</a>
-            </div>
-            <div class="hidden sm:block">
-                <a href="tel:4805390923"
-                    class="bg-blue-900 hover:bg-blue-950 text-white px-6 py-3 rounded-md font-bold transition shadow-md">
-                    📞 480-539-0923
-                </a>
-            </div>
+    <div class="sticky top-0 z-40 shadow-md">
+        <!-- Top Urgent Banner -->
+        <div class="bg-red-600 text-white text-center pt-[calc(0.5rem+env(safe-area-inset-top,0px))] pb-2 px-4 text-sm font-semibold tracking-wide">
+            💥 Need Emergency AC Repair? We are open 24/7 across the Valley! Call or Text Now.
         </div>
-    </nav>
+
+        <!-- Navigation -->
+        <nav class="bg-white border-b border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <a href="/" class="flex flex-col hover:no-underline">
+                    <span class="text-2xl font-black tracking-tight text-slate-900 uppercase">Gleeson</span>
+                    <span class="text-xs font-bold tracking-widest text-red-600 uppercase -mt-1">Mechanical</span>
+                </a>
+                <div class="hidden md:flex space-x-8 font-semibold text-slate-600">
+                    <a href="/" class="hover:text-blue-900 transition">Cooling</a>
+                    <a href="/" class="hover:text-blue-900 transition">Heating</a>
+                    <a href="/" class="hover:text-blue-900 transition">Energy Savings</a>
+                    <a href="/" class="hover:text-blue-900 transition">About</a>
+                </div>
+                <div class="hidden sm:block">
+                    <a href="tel:4805390923"
+                        class="bg-blue-900 hover:bg-blue-950 text-white px-6 py-3 rounded-md font-bold transition shadow-md flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.387a12.035 12.035 0 0 1-7.108-7.108c-.155-.44.01-1.29.387-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                        </svg>
+                        <span>480-539-0923</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
 
     <!-- Hero -->
     <header class="hero-grad text-white py-14 px-4 text-center relative overflow-hidden">
@@ -236,12 +285,12 @@
     </header>
 
     <!-- Main Form -->
-    <main class="max-w-2xl mx-auto px-4 py-12 pb-32">
+    <main class="max-w-2xl mx-auto px-3 sm:px-4 py-12 pb-32">
 
         <form id="scheduleForm" novalidate>
 
             <!-- ── 1. Contact Information ── -->
-            <div class="section-card p-6 mb-6">
+            <div class="section-card p-3 sm:p-6 mb-6">
                 <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide mb-5 flex items-center gap-2">
                     <span
                         class="bg-blue-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">1</span>
@@ -278,7 +327,7 @@
             </div>
 
             <!-- ── 2. Comments ── -->
-            <div class="section-card p-6 mb-6">
+            <div class="section-card p-3 sm:p-6 mb-6">
                 <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide mb-5 flex items-center gap-2">
                     <span
                         class="bg-blue-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">2</span>
@@ -291,7 +340,7 @@
             </div>
 
             <!-- ── 3. Preferred Date & Time ── -->
-            <div class="section-card p-6 mb-8">
+            <div class="section-card p-3 sm:p-6 mb-8">
                 <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide mb-5 flex items-center gap-2">
                     <span
                         class="bg-blue-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">3</span>
@@ -320,13 +369,13 @@
                     <!-- Month Navigation -->
                     <div class="flex items-center justify-between mb-3">
                         <button type="button" id="prevMonth"
-                            class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 transition">
+                            class="w-11 h-11 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-lg transition">
                             ‹
                         </button>
                         <span id="monthLabel"
                             class="font-black text-slate-800 text-base uppercase tracking-wide"></span>
                         <button type="button" id="nextMonth"
-                            class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 transition">
+                            class="w-11 h-11 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-lg transition">
                             ›
                         </button>
                     </div>
@@ -369,14 +418,13 @@
 
     <!-- Sticky Mobile Footer -->
     <div
-        class="fixed bottom-0 left-0 right-0 z-50 flex border-t-2 border-slate-200 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.12)]">
+        class="fixed bottom-0 left-0 right-0 z-50 flex border-t border-slate-200 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.12)] bg-red-600">
         <a href="tel:4805390923"
-            class="flex-1 bg-blue-900 hover:bg-blue-950 text-white font-black py-4 flex items-center justify-center gap-2 text-center transition">
-            📞 CALL NOW
-        </a>
-        <a href="sms:4805390923?body=I%20need%20to%20schedule%20an%20HVAC%20diagnostic%20appointment."
-            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-4 flex items-center justify-center gap-2 text-center transition">
-            💬 TEXT US
+            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] flex items-center justify-center gap-2 text-center transition animate-call-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.387a12.035 12.035 0 0 1-7.108-7.108c-.155-.44.01-1.29.387-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+            </svg>
+            <span>CALL NOW!</span>
         </a>
     </div>
 
