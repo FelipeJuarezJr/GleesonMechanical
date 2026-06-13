@@ -8,6 +8,12 @@
       ".git/**",
       "node_modules/**"
     ],
+    "rewrites": [
+      {
+        "source": "/contact_us",
+        "destination": "/contact_us.html"
+      }
+    ],
     "headers": [
       {
         "source": "**/*.html",

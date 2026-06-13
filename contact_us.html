@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule a Visit | Gleeson Mechanical</title>
+    <meta name="description"
+        content="Schedule an HVAC service visit with Gleeson Mechanical. Choose your preferred date and time or request same-day service.">
+    <!-- Tailwind CSS 4 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ── Calendar ── */
+        .cal-day {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, transform 0.1s;
+            border: 2px solid transparent;
+        }
+
+        .cal-day:hover:not(.cal-disabled) {
+            background: #1e3a5f;
+            color: #fff;
+            transform: scale(1.08);
+        }
+
+        .cal-day.cal-selected {
+            background: #dc2626;
+            color: #fff;
+            border-color: #991b1b;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, .25);
+        }
+
+        .cal-day.cal-today:not(.cal-selected) {
+            border-color: #1e40af;
+            color: #1e40af;
+        }
+
+        .cal-day.cal-disabled {
+            color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* ── Time chips ── */
+        .time-chip {
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 2px solid #e2e8f0;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: #f8fafc;
+        }
+
+        .time-chip:hover {
+            border-color: #1e3a5f;
+            color: #1e3a5f;
+            background: #eff6ff;
+        }
+
+        .time-chip.selected {
+            background: #1e3a5f;
+            border-color: #1e3a5f;
+            color: #fff;
+        }
+
+        /* ── ASAP toggle ── */
+        #asapToggle:checked~label,
+        .asap-label-active {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+            border-color: #991b1b;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, .35);
+        }
+
+        /* ── Floating label inputs ── */
+        .form-group {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            background: #f8fafc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            color: #1e293b;
+        }
+
+        .form-input:focus {
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, .12);
+            background: #fff;
+        }
+
+        .form-input::placeholder {
+            color: transparent;
+        }
+
+        .form-label {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            color: #94a3b8;
+            pointer-events: none;
+            transition: all 0.18s;
+            font-weight: 500;
+        }
+
+        textarea.form-input {
+            padding-top: 1.3rem;
+            min-height: 7rem;
+            resize: vertical;
+        }
+
+        textarea+.form-label {
+            top: 1.1rem;
+            transform: none;
+        }
+
+        .form-input:focus+.form-label,
+        .form-input:not(:placeholder-shown)+.form-label {
+            top: 0.35rem;
+            transform: none;
+            font-size: 0.7rem;
+            color: #1e3a5f;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        textarea.form-input:focus+.form-label,
+        textarea.form-input:not(:placeholder-shown)+.form-label {
+            top: 0.3rem;
+            font-size: 0.7rem;
+            color: #1e3a5f;
+            font-weight: 700;
+        }
+
+        /* ── Success overlay ── */
+        #successOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(15, 23, 42, .7);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        #successOverlay.show {
+            display: flex;
+        }
+
+        /* ── Animated gradient hero ── */
+        .hero-grad {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+        }
+
+        /* ── Input section card ── */
+        .section-card {
+            background: #fff;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+            border: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Top Urgent Banner -->
+    <div class="bg-red-600 text-white text-center py-2 px-4 text-sm font-semibold tracking-wide">
+        💥 Need Emergency AC Repair? We are open 24/7 across the Valley! Call or Text Now.
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 bg-white shadow-md z-40 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="/" class="flex flex-col no-underline">
+                <span class="text-2xl font-black tracking-tight text-slate-900 uppercase">Gleeson</span>
+                <span class="text-xs font-bold tracking-widest text-red-600 uppercase -mt-1">Mechanical</span>
+            </a>
+            <div class="hidden md:flex space-x-8 font-semibold text-slate-600">
+                <a href="/" class="hover:text-blue-900 transition">Cooling</a>
+                <a href="/" class="hover:text-blue-900 transition">Heating</a>
+                <a href="/" class="hover:text-blue-900 transition">Energy Savings</a>
+                <a href="/" class="hover:text-blue-900 transition">About</a>
+            </div>
+            <div class="hidden sm:block">
+                <a href="tel:4805390923"
+                    class="bg-blue-900 hover:bg-blue-950 text-white px-6 py-3 rounded-md font-bold transition shadow-md">
+                    📞 480-539-0923
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-grad text-white py-14 px-4 text-center relative overflow-hidden">
+        <div
+            class="absolute inset-0 opacity-5 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:28px_28px]">
+        </div>
+        <div class="relative max-w-3xl mx-auto">
+            <span
+                class="bg-red-600 text-white text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Schedule
+                Your Visit</span>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight mt-5 mb-3 leading-tight uppercase">
+                Book an HVAC Service
+            </h1>
+            <p class="text-slate-300 text-lg max-w-xl mx-auto">
+                Fill out the form below and a Gleeson Mechanical technician will confirm your appointment quickly.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Form -->
+    <main class="max-w-2xl mx-auto px-4 py-12 pb-32">
+
+        <form id="scheduleForm" novalidate>
+
+            <!-- ── 1. Contact Information ── -->
+            <div class="section-card p-6 mb-6">
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide mb-5 flex items-center gap-2">
+                    <span
+                        class="bg-blue-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">1</span>
+                    Contact Information
+                </h2>
+
+                <div class="form-group">
+                    <input id="fullName" name="fullName" type="text" class="form-input" placeholder="Full Name"
+                        required>
+                    <label for="fullName" class="form-label">Full Name *</label>
+                    <p class="text-red-500 text-xs mt-1 hidden error-msg" id="fullName-err">Please enter your full name.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <input id="email" name="email" type="email" class="form-input" placeholder="Email Address" required>
+                    <label for="email" class="form-label">Email Address *</label>
+                    <p class="text-red-500 text-xs mt-1 hidden error-msg" id="email-err">Please enter a valid email.</p>
+                </div>
+
+                <div class="form-group">
+                    <input id="phone" name="phone" type="tel" class="form-input" placeholder="Phone Number" required
+                        pattern="[\d\s\-\(\)\+]{7,}">
+                    <label for="phone" class="form-label">Phone Number *</label>
+                    <p class="text-red-500 text-xs mt-1 hidden error-msg" id="phone-err">Please enter a valid phone
+                        number.</p>
+                </div>
+
+                <div class="form-group mb-0">
+                    <input id="address" name="address" type="text" class="form-input"
+                        placeholder="Service Address (optional)">
+                    <label for="address" class="form-label">Service Address (optional)</label>
+                </div>
+            </div>
+
+            <!-- ── 2. Comments ── -->
+            <div class="section-card p-6 mb-6">
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide mb-5 flex items-center gap-2">
+                    <span
+                        class="bg-blue-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">2</span>
+                    Tell Us What You Need
+                </h2>
+                <div class="form-group mb-0">
+                    <textarea id="comments" name="comments" class="form-input" placeholder="Comments"></textarea>
+                    <label for="comments" class="form-label">Comments / Service Description</label>
+                </div>
+            </div>
+
+            <!-- ── 3. Preferred Date & Time ── -->
+            <div class="section-card p-6 mb-8">
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide mb-5 flex items-center gap-2">
+                    <span
+                        class="bg-blue-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-black">3</span>
+                    Preferred Date &amp; Time
+                </h2>
+
+                <!-- ASAP Toggle -->
+                <label id="asapLabel" for="asapToggle"
+                    class="flex items-center justify-between gap-3 mb-5 cursor-pointer p-4 rounded-xl border-2 border-slate-200 bg-slate-50 hover:border-red-500 transition-all select-none">
+                    <div>
+                        <p class="font-black text-base text-slate-800" id="asapTextMain">⚡ As Soon As Possible</p>
+                        <p class="text-xs text-slate-500 mt-0.5" id="asapTextSub">Skip the calendar — send us over now
+                            &amp; we'll call to confirm.</p>
+                    </div>
+                    <div class="relative flex-shrink-0">
+                        <input type="checkbox" id="asapToggle" class="sr-only" onchange="handleAsap(this)">
+                        <div id="asapToggleTrack" class="w-12 h-6 rounded-full bg-slate-300 transition-colors"></div>
+                        <div id="asapToggleThumb"
+                            class="absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform">
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Calendar + Time (hidden when ASAP) -->
+                <div id="calendarSection">
+                    <!-- Month Navigation -->
+                    <div class="flex items-center justify-between mb-3">
+                        <button type="button" id="prevMonth"
+                            class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 transition">
+                            ‹
+                        </button>
+                        <span id="monthLabel"
+                            class="font-black text-slate-800 text-base uppercase tracking-wide"></span>
+                        <button type="button" id="nextMonth"
+                            class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold text-slate-500 transition">
+                            ›
+                        </button>
+                    </div>
+
+                    <!-- Day-of-week headers -->
+                    <div class="grid grid-cols-7 mb-1">
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">Su</div>
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">Mo</div>
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">Tu</div>
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">We</div>
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">Th</div>
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">Fr</div>
+                        <div class="text-center text-xs font-bold text-slate-400 uppercase py-1">Sa</div>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1 mb-5"></div>
+
+                    <!-- Time Slots -->
+                    <div id="timeSlotsSection" class="hidden">
+                        <p class="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3">
+                            Select a Time — <span id="selectedDateLabel" class="text-blue-900"></span>
+                        </p>
+                        <div id="timeSlots" class="flex flex-wrap gap-2"></div>
+                        <p class="text-red-500 text-xs mt-2 hidden" id="time-err">Please select a preferred time.</p>
+                    </div>
+
+                    <p class="text-red-500 text-xs mt-2 hidden" id="date-err">Please pick a date or select "As Soon As
+                        Possible".</p>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" id="submitBtn"
+                class="w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white text-lg font-black py-5 rounded-xl shadow-xl transition-all duration-200 hover:shadow-red-900/30 tracking-wide uppercase">
+                📅 Submit Appointment Request
+            </button>
+        </form>
+    </main>
+
+    <!-- Sticky Mobile Footer -->
+    <div
+        class="fixed bottom-0 left-0 right-0 z-50 flex border-t-2 border-slate-200 md:hidden shadow-[0_-8px_30px_rgb(0,0,0,0.12)]">
+        <a href="tel:4805390923"
+            class="flex-1 bg-blue-900 hover:bg-blue-950 text-white font-black py-4 flex items-center justify-center gap-2 text-center transition">
+            📞 CALL NOW
+        </a>
+        <a href="sms:4805390923?body=I%20need%20to%20schedule%20an%20HVAC%20diagnostic%20appointment."
+            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-4 flex items-center justify-center gap-2 text-center transition">
+            💬 TEXT US
+        </a>
+    </div>
+
+    <!-- Success Overlay -->
+    <div id="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 mx-4 max-w-md w-full text-center animate-bounce-in">
+            <div class="text-6xl mb-4">✅</div>
+            <h2 id="successTitle" class="text-2xl font-black text-slate-900 mb-2">Request Received!</h2>
+            <p class="text-slate-700 font-bold mb-2 text-lg">Customer service will be contacting you soon!</p>
+            <p class="text-slate-500 text-sm mb-6" id="successDetails"></p>
+            <a href="/"
+                class="inline-block bg-blue-900 hover:bg-blue-950 text-white font-bold px-8 py-3 rounded-lg transition">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // ─────────────────────────── Calendar Logic ───────────────────────────
+        const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const TIME_SLOTS = ['7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
+
+        let currentYear, currentMonth, selectedDate = null, selectedTime = null, asapMode = false;
+
+        function initCalendar() {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            document.getElementById('monthLabel').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Leading blanks
+            for (let i = 0; i < firstDay; i++) {
+                const blank = document.createElement('div');
+                grid.appendChild(blank);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(currentYear, currentMonth, d);
+                const btn = document.createElement('div');
+                btn.textContent = d;
+                btn.classList.add('cal-day');
+
+                const isToday = date.getTime() === today.getTime();
+                const isPast = date < today;
+                const isSunday = date.getDay() === 0;
+
+                if (isPast || isSunday) {
+                    btn.classList.add('cal-disabled');
+                } else {
+                    if (isToday) btn.classList.add('cal-today');
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    if (selectedDate === dateStr) btn.classList.add('cal-selected');
+                    btn.addEventListener('click', () => selectDate(dateStr, btn, date));
+                }
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectDate(dateStr, btnEl, dateObj) {
+            selectedDate = dateStr;
+            selectedTime = null;
+            document.querySelectorAll('.cal-day').forEach(b => b.classList.remove('cal-selected'));
+            btnEl.classList.add('cal-selected');
+
+            const label = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('selectedDateLabel').textContent = label;
+
+            renderTimeSlots();
+            document.getElementById('timeSlotsSection').classList.remove('hidden');
+            document.getElementById('date-err').classList.add('hidden');
+        }
+
+        function renderTimeSlots() {
+            const container = document.getElementById('timeSlots');
+            container.innerHTML = '';
+            TIME_SLOTS.forEach(slot => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.textContent = slot;
+                chip.classList.add('time-chip');
+                if (selectedTime === slot) chip.classList.add('selected');
+                chip.addEventListener('click', () => {
+                    selectedTime = slot;
+                    document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+                    chip.classList.add('selected');
+                    document.getElementById('time-err').classList.add('hidden');
+                });
+                container.appendChild(chip);
+            });
+        }
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            const now = new Date();
+            if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+            else currentMonth--;
+            // Don't go before current month
+            if (currentYear < now.getFullYear() || (currentYear === now.getFullYear() && currentMonth < now.getMonth())) {
+                currentYear = now.getFullYear();
+                currentMonth = now.getMonth();
+            }
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+            else currentMonth++;
+            renderCalendar();
+        });
+
+        // ─────────────────────────── ASAP Toggle ───────────────────────────
+        function handleAsap(checkbox) {
+            asapMode = checkbox.checked;
+            const track = document.getElementById('asapToggleTrack');
+            const thumb = document.getElementById('asapToggleThumb');
+            const label = document.getElementById('asapLabel');
+            const calSection = document.getElementById('calendarSection');
+
+            if (asapMode) {
+                track.classList.remove('bg-slate-300');
+                track.classList.add('bg-red-500');
+                thumb.style.transform = 'translateX(1.5rem)';
+                label.classList.add('border-red-500', 'bg-red-50');
+                label.classList.remove('border-slate-200', 'bg-slate-50');
+                document.getElementById('asapTextMain').classList.add('text-red-700');
+                calSection.style.opacity = '0.35';
+                calSection.style.pointerEvents = 'none';
+                document.getElementById('date-err').classList.add('hidden');
+                document.getElementById('time-err').classList.add('hidden');
+            } else {
+                track.classList.add('bg-slate-300');
+                track.classList.remove('bg-red-500');
+                thumb.style.transform = 'translateX(0)';
+                label.classList.remove('border-red-500', 'bg-red-50');
+                label.classList.add('border-slate-200', 'bg-slate-50');
+                document.getElementById('asapTextMain').classList.remove('text-red-700');
+                calSection.style.opacity = '1';
+                calSection.style.pointerEvents = '';
+            }
+        }
+
+        // ─────────────────────────── Form Validation ───────────────────────────
+        function validateForm() {
+            let valid = true;
+
+            // Name
+            const name = document.getElementById('fullName');
+            const nameErr = document.getElementById('fullName-err');
+            if (!name.value.trim()) {
+                nameErr.classList.remove('hidden'); valid = false;
+            } else nameErr.classList.add('hidden');
+
+            // Email
+            const email = document.getElementById('email');
+            const emailErr = document.getElementById('email-err');
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRe.test(email.value.trim())) {
+                emailErr.classList.remove('hidden'); valid = false;
+            } else emailErr.classList.add('hidden');
+
+            // Phone
+            const phone = document.getElementById('phone');
+            const phoneErr = document.getElementById('phone-err');
+            const phoneClean = phone.value.replace(/\D/g, '');
+            if (phoneClean.length < 7) {
+                phoneErr.classList.remove('hidden'); valid = false;
+            } else phoneErr.classList.add('hidden');
+
+            // Date / ASAP
+            if (!asapMode) {
+                const dateErr = document.getElementById('date-err');
+                if (!selectedDate) {
+                    dateErr.classList.remove('hidden'); valid = false;
+                } else dateErr.classList.add('hidden');
+
+                const timeErr = document.getElementById('time-err');
+                if (selectedDate && !selectedTime) {
+                    timeErr.classList.remove('hidden'); valid = false;
+                } else timeErr.classList.add('hidden');
+            }
+
+            return valid;
+        }
+
+        // ─────────────────────────── Form Submit ───────────────────────────
+        document.getElementById('scheduleForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!validateForm()) return;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '🔄 Sending request...';
+
+            const name = document.getElementById('fullName').value.trim();
+            const when = asapMode
+                ? 'As Soon As Possible'
+                : `${selectedDate} at ${selectedTime}`;
+
+            const payload = {
+                name: name,
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                address: document.getElementById('address').value.trim() || 'Not Provided',
+                comments: document.getElementById('comments').value.trim() || 'None',
+                preferred_time: when,
+                _subject: `New Appointment Request from ${name} (${when})`
+            };
+            // FOR TESTING PURPOSES ONLY: mr.felipe.juarez.jr@gmail.com RYAN'S EMAIL IS ryan@gleesonmechanical.com WILL BE USED IN PRODUCTION
+            fetch('https://formsubmit.co/ajax/mr.felipe.juarez.jr@gmail.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(() => {
+                    showSuccess(name, when);
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                    showSuccess(name, when);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                });
+        });
+
+        function showSuccess(name, when) {
+            const firstName = name.split(' ')[0];
+            document.getElementById('successDetails').textContent =
+                `Hi ${firstName}, we've received your request for ${when}.`;
+            document.getElementById('successOverlay').classList.add('show');
+            document.documentElement.style.overflow = 'hidden';
+        }
+
+        document.getElementById('successOverlay').addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+                document.documentElement.style.overflow = '';
+            }
+        });
+
+        // ─────────────────────────── Init ───────────────────────────
+        initCalendar();
+    </script>
+
+</body>
+
+</html>
